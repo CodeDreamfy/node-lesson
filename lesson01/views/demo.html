@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>手机端浏览器调用相机、相册功能</title>
+</head>
+
+<body>
+
+  <div>
+    <input id="btn_camera" type="file" accept="image/*" multiple />
+    <div id="image" style="width:300px; height:200px;"></div>
+  </div>
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+  <!-- <script type="text/javascript" src="./vconsole.min.js"></script> -->
+  <script>
+    // var vConsole = new VConsole();
+    $(function () {
+      $('#btn_camera').on('change', onTake)
+      function onTake() {
+        var imageBase = "";
+        var reader = new FileReader();
+        reader.onloadend = function (e) {
+          imageBase = e.target.result.replace("data:image/png;base64,", "");
+          var url = 'url(' + e.target.result + ') no-repeat center center';
+          // console.log(url)
+          $("#image").css({
+            "background": url,
+            "background-size": "contain",
+            // "background-attachment": "fixed"
+          });
+          getTextValue(e.target.result)
+        }
+        reader.readAsDataURL(event.target.files[0]);
+        
+        // $(this).value = null;//每次选中图片之后清空file 不然在点击就不能触发点击事件
+
+      }
+      function getTextValue(blob) {
+        const formData = new FormData();
+        formData.append('uploadfile', document.querySelector('#btn_camera').files[0]);
+        $.ajax({
+          method: 'POST',
+          url: '/getText',
+          header: { 'Content-Type': 'multipart/form-data' },
+          data: formData,
+          processData: false,
+          contentType: false,
+          success: function(res) {
+            console.log("res", res)
+            document.querySelector('#btn_camera').files[0] = '';
+          }
+        })
+      }
+    })
+
+  </script>
+</body>
+
+</html>
