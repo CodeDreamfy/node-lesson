@@ -12,6 +12,10 @@
   <div>
     <input id="btn_camera" type="file" accept="image/*" multiple />
     <div id="image" style="width:300px; height:200px;"></div>
+    <div class="result-wrap">
+      <h2>识别结果:</h2>
+      <p class="result"></p>
+    </div>
   </div>
   <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
   <!-- <script type="text/javascript" src="./vconsole.min.js"></script> -->
@@ -40,7 +44,9 @@
       }
       function getTextValue(blob) {
         const formData = new FormData();
-        formData.append('uploadfile', document.querySelector('#btn_camera').files[0]);
+        formData.append('imgData', blob);
+        var $elm = $('.result');
+        $elm.html('正在识别,请稍等^-^')
         $.ajax({
           method: 'POST',
           url: '/getText',
@@ -49,7 +55,11 @@
           processData: false,
           contentType: false,
           success: function(res) {
-            console.log("res", res)
+            var str = '';
+            for(var i=0; i< res.data.words_result_num; i++) {
+              str += (i+1) + ': ' + res.data.words_result[i].words + ';<br/>'
+            }
+            $('.result').html(str)
             document.querySelector('#btn_camera').files[0] = '';
           }
         })
