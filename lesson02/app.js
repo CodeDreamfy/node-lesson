@@ -31,19 +31,36 @@ app.use(session({
 }))
 
 app.use(flash())
+// 处理表单及文件上传的中间件
+app.use(require('express-formidable')({
+  uploadDir: path.join(__dirname, 'public/img'), // 上传文件目录
+  keepExtensions: true// 保留后缀
+}))
 
 app.use((req, res, next) => {
   console.log("Time: %d", Date.now());
   next();
 })
-app.use('/', indexRouter);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Something broke');
 })
 
-app.listen(3000, function () {
-  console.log("service running on port 3000 ")
+app.locals.blog = {
+  title: pkg.name,
+  description: pkg.description
+}
+
+app.use((req, res, next) => {
+  res.locals.user = req.session.user
+  res.locals.success = req.flash('success').toString()
+  res.locals.error = req.flash('error').toString()
+  next()
+})
+routes(app);
+
+app.listen(config.port, function () {
+  console.log(`${pkg.name} listening on port ${config.port}`)
 })
 
